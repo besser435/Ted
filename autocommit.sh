@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 #####################################################################
 ### Please set the paths accordingly. In case you don't have all  ###
