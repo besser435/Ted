@@ -5,5 +5,5 @@ Free tech tip: run with `bash` not `sh`
 
 ```
 cd ~/Ted 
-bash autocommit.sh
+bash autocommit.sh 
 ```
