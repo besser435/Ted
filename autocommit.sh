@@ -5,7 +5,7 @@
 ### the listed folders, just keep that line commented out.        ###
 #####################################################################
 ### Path to your config folder you want to back up
-config_folder=~/Ted
+config_folder=~/Ted # this is the backup repo, not the klipper directory
 
 ### Path to your Klipper folder, by default that is '~/klipper'
 klipper_folder=~/klipper
