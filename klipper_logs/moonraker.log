@@ -1124,3 +1124,182 @@ utils.ServerError: Klippy Host not connected
 2023-02-18 13:05:09,421 [app.py:log_request()] - 201 POST /server/files/upload (192.168.0.166) [_TRUSTED_USER_] 29.06ms
 2023-02-18 13:20:59,735 [authorization.py:_prune_conn_handler()] - Trusted Connection Expired, IP: 192.168.0.222
 2023-02-18 14:05:59,755 [authorization.py:_prune_conn_handler()] - Trusted Connection Expired, IP: 192.168.0.166
+2023-02-18 14:21:14,910 [authorization.py:_check_trusted_connection()] - Trusted Connection Detected, IP: 192.168.0.166
+2023-02-18 14:24:20,152 [app.py:log_request()] - 201 POST /server/files/upload (192.168.0.166) [_TRUSTED_USER_] 33.18ms
+2023-02-18 14:24:21,239 [klippy_connection.py:_on_connection_closed()] - Klippy Connection Removed
+2023-02-18 14:24:21,262 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Host not connected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 471, in request
+    raise ServerError("Klippy Host not connected", 503)
+utils.ServerError: Klippy Host not connected
+2023-02-18 14:24:21,337 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Host not connected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 471, in request
+    raise ServerError("Klippy Host not connected", 503)
+utils.ServerError: Klippy Host not connected
+2023-02-18 14:24:21,530 [authorization.py:_check_trusted_connection()] - Trusted Connection Detected, IP: 192.168.0.222
+2023-02-18 14:24:22,503 [klippy_connection.py:_do_connect()] - Klippy Connection Established
+2023-02-18 14:24:22,835 [klippy_connection.py:_init_klippy_connection()] - Webhooks Subscribed
+2023-02-18 14:24:22,839 [klippy_connection.py:_init_klippy_connection()] - GCode Output Subscribed
+2023-02-18 14:24:24,345 [job_state.py:_handle_started()] - Job state initialized: standby
+2023-02-18 14:24:24,622 [klippy_connection.py:_check_ready()] - Klippy ready
+2023-02-18 14:24:25,099 [data_store.py:_init_sensors()] - Configuring available sensors: ['heater_bed', 'temperature_sensor raspberry_pi', 'temperature_sensor mcu_temp', 'extruder']
+2023-02-18 14:25:41,391 [app.py:log_request()] - 201 POST /server/files/upload (192.168.0.166) [_TRUSTED_USER_] 21.23ms
+2023-02-18 14:25:42,479 [klippy_connection.py:_on_connection_closed()] - Klippy Connection Removed
+2023-02-18 14:25:42,497 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Host not connected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 471, in request
+    raise ServerError("Klippy Host not connected", 503)
+utils.ServerError: Klippy Host not connected
+2023-02-18 14:25:42,564 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Host not connected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 471, in request
+    raise ServerError("Klippy Host not connected", 503)
+utils.ServerError: Klippy Host not connected
+2023-02-18 14:25:43,746 [klippy_connection.py:_do_connect()] - Klippy Connection Established
+2023-02-18 14:25:44,081 [klippy_connection.py:_init_klippy_connection()] - Webhooks Subscribed
+2023-02-18 14:25:44,084 [klippy_connection.py:_init_klippy_connection()] - GCode Output Subscribed
+2023-02-18 14:25:45,628 [job_state.py:_handle_started()] - Job state initialized: standby
+2023-02-18 14:25:45,860 [klippy_connection.py:_check_ready()] - Klippy ready
+2023-02-18 14:25:46,344 [data_store.py:_init_sensors()] - Configuring available sensors: ['heater_bed', 'temperature_sensor raspberry_pi', 'temperature_sensor mcu_temp', 'extruder']
+2023-02-18 14:26:31,635 [app.py:log_request()] - 201 POST /server/files/upload (192.168.0.166) [_TRUSTED_USER_] 25.41ms
+2023-02-18 14:26:32,729 [klippy_connection.py:_on_connection_closed()] - Klippy Connection Removed
+2023-02-18 14:26:32,751 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Host not connected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 471, in request
+    raise ServerError("Klippy Host not connected", 503)
+utils.ServerError: Klippy Host not connected
+2023-02-18 14:26:32,832 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Host not connected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 471, in request
+    raise ServerError("Klippy Host not connected", 503)
+utils.ServerError: Klippy Host not connected
+2023-02-18 14:26:33,992 [klippy_connection.py:_do_connect()] - Klippy Connection Established
+2023-02-18 14:26:34,346 [klippy_connection.py:_init_klippy_connection()] - Webhooks Subscribed
+2023-02-18 14:26:34,370 [klippy_connection.py:_init_klippy_connection()] - GCode Output Subscribed
+2023-02-18 14:26:34,384 [klippy_connection.py:_check_ready()] - 
+Option 'set_led led' is not valid in section 'gcode_shell_command backup_cfg'
+
+Once the underlying issue is corrected, use the "RESTART"
+command to reload the config and restart the host software.
+Printer is halted
+
+2023-02-18 14:27:31,328 [app.py:log_request()] - 201 POST /server/files/upload (192.168.0.166) [_TRUSTED_USER_] 21.14ms
+2023-02-18 14:27:31,694 [klippy_connection.py:close()] - Error closing Klippy Unix Socket
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 577, in close
+    await self.writer.wait_closed()
+  File "/usr/lib/python3.7/asyncio/streams.py", line 323, in wait_closed
+    await self._protocol._closed
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 143, in _read_stream
+    data = await reader.readuntil(b'\x03')
+  File "/usr/lib/python3.7/asyncio/streams.py", line 588, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/lib/python3.7/asyncio/streams.py", line 473, in _wait_for_data
+    await self._waiter
+  File "/usr/lib/python3.7/asyncio/selector_events.py", line 801, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2023-02-18 14:27:31,695 [klippy_connection.py:_on_connection_closed()] - Klippy Connection Removed
+2023-02-18 14:27:31,700 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Disconnected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 481, in request
+    return await self._request_standard(web_request)
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 536, in _request_standard
+    return await base_request.wait()
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 608, in wait
+    raise self.response
+utils.ServerError: Klippy Disconnected
+2023-02-18 14:27:31,716 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Host not connected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 471, in request
+    raise ServerError("Klippy Host not connected", 503)
+utils.ServerError: Klippy Host not connected
+2023-02-18 14:27:31,801 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Host not connected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 471, in request
+    raise ServerError("Klippy Host not connected", 503)
+utils.ServerError: Klippy Host not connected
+2023-02-18 14:27:32,960 [klippy_connection.py:_do_connect()] - Klippy Connection Established
+2023-02-18 14:27:33,299 [klippy_connection.py:_init_klippy_connection()] - Webhooks Subscribed
+2023-02-18 14:27:33,302 [klippy_connection.py:_init_klippy_connection()] - GCode Output Subscribed
+2023-02-18 14:27:33,309 [klippy_connection.py:_check_ready()] - 
+Option 'gcode' is not valid in section 'gcode_shell_command backup_cfg'
+
+Once the underlying issue is corrected, use the "RESTART"
+command to reload the config and restart the host software.
+Printer is halted
+
+2023-02-18 14:28:26,866 [app.py:log_request()] - 201 POST /server/files/upload (192.168.0.166) [_TRUSTED_USER_] 21.26ms
+2023-02-18 14:28:27,224 [klippy_connection.py:_on_connection_closed()] - Klippy Connection Removed
+2023-02-18 14:28:27,243 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Host not connected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 471, in request
+    raise ServerError("Klippy Host not connected", 503)
+utils.ServerError: Klippy Host not connected
+2023-02-18 14:28:27,317 [websockets.py:build_error()] - JSON-RPC Request Error: 503
+Klippy Host not connected
+Traceback (most recent call last):
+  File "/home/pi/moonraker/moonraker/websockets.py", line 253, in execute_method
+    result = await callback(params)
+  File "/home/pi/moonraker/moonraker/websockets.py", line 351, in func
+    user=sc.user_info))
+  File "/home/pi/moonraker/moonraker/klippy_connection.py", line 471, in request
+    raise ServerError("Klippy Host not connected", 503)
+utils.ServerError: Klippy Host not connected
+2023-02-18 14:28:28,485 [klippy_connection.py:_do_connect()] - Klippy Connection Established
+2023-02-18 14:28:28,821 [klippy_connection.py:_init_klippy_connection()] - Webhooks Subscribed
+2023-02-18 14:28:28,826 [klippy_connection.py:_init_klippy_connection()] - GCode Output Subscribed
+2023-02-18 14:28:30,385 [job_state.py:_handle_started()] - Job state initialized: standby
+2023-02-18 14:28:30,607 [klippy_connection.py:_check_ready()] - Klippy ready
+2023-02-18 14:28:31,082 [data_store.py:_init_sensors()] - Configuring available sensors: ['heater_bed', 'temperature_sensor raspberry_pi', 'temperature_sensor mcu_temp', 'extruder']
