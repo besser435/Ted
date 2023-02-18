@@ -5,7 +5,7 @@
 ### the listed folders, just keep that line commented out.        ###
 #####################################################################
 ### Path to your config folder you want to back up
-config_folder=~/Ted
+config_folder=~/Ted # this is the backup repo, not the klipper directory
 
 ### Path to your Klipper folder, by default that is '~/klipper'
 klipper_folder=~/klipper
@@ -51,8 +51,15 @@ grab_version() {
 }
 
 push_config() {
+  # This original srcipt is a bit different from what I need it for, so I added this.
+  # It copies the files to be backed up into the repo folder, then commits those changes.
+  cp -r -p -u -v ~/klipper_config ~/klipper ~/moonraker ~/fluidd ~/printer_data ~/Ted
+  # -r copy directories recursively
+  # -p preserves ownership and timestamps of the original files
+  # -u copy only when the SOURCE file is newer than the destination file or when the destination file is missing
+  # -v explain what is being done
+
   local current_date
-  
   cd "${config_folder}" || exit 1
   git pull
   git add .
