@@ -53,7 +53,7 @@ grab_version() {
 push_config() {
   # This original srcipt is a bit different from what I need it for, so I added this.
   # It copies the files to be backed up into the repo folder, then commits those changes.
-  cp -r -p -u -v ~/klipper_config ~/klipper_logs ~/printer_data ~/Ted
+  cp -r -p -u -v ~/klipper_config ~/klipper ~/moonraker ~/fluidd ~/printer_data ~/Ted
   # -r copy directories recursively
   # -p preserves ownership and timestamps of the original files
   # -u copy only when the SOURCE file is newer than the destination file or when the destination file is missing
