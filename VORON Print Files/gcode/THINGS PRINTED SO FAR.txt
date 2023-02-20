@@ -1,0 +1,13 @@
+Batch 1 main parts, 9 hours 30 minutes
+Batch 2 main parts, 14 hours 20 minutes
+Mulitple parts, 11 hours 41 minutes
+Tophat parts main parts, 10 hours 38 minutes
+Toolhead, 2 hours 48 minutes
+Extruder, 4 hours 30 minutes
+
+
+Accent toolhead, 1 hour 45 minutes
+Accent multiple parts,
+Accent main parts, 9 hours 45 minutes
+
+

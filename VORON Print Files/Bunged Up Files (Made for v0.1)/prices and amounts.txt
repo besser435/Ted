@@ -1,0 +1,26 @@
+enclosure = $3.81, 136 grams, B, 15h 20m
+skirt = $1.87,  67 grams, B, 8h
+batch1 = $2.83, 101 grams, B, 11h 33m
+stuff = $0.33, 12 grams, B, 2h
+tools = $0.33, 11 grams, B, 1h 15m
+batch1 = $3.13, 112 grams, B, 13h
+toolheaad = $0.60, 21 grams, B, 2h 50m
+
+batch1 = $2.22, 80 grams, A, 9h 20m
+endstop, fanshroud = $0.40, 14 grams, A, 2h
+
+
+
+
+65 hours print time
+
+$12.90 for B parts
+460 grams for B parts
+
+$2.60 for A parts
+94 grams for A parts
+
+this assumes there is no failed prints
+
+
+
