@@ -14,6 +14,7 @@ cors_domains =
 	*.local
 	*.lan
 	*://app.fluidd.xyz
+	*.local:7136
 trusted_clients = 
 	10.0.0.0/8
 	127.0.0.0/8
@@ -29,6 +30,13 @@ trusted_clients =
 
 [update_manager]
 enable_auto_refresh = True
+
+[update_manager pgcode]
+type = git_repo
+primary_branch = main
+origin = https://github.com/Kragrathea/pgcode.git
+path = ~/pgcode
+is_system_service = False
 
 [update_manager client fluidd]
 type = web
