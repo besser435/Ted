@@ -89,7 +89,7 @@
   };
 
   // node_modules/monaco-editor/esm/vs/base/common/functional.js
-  function createSingleCallFunction(fn) {
+  function createSingleCallFunction(fn, fnDidRunCallback) {
     const _this = this;
     let didCall = false;
     let result;
@@ -98,7 +98,15 @@
         return result;
       }
       didCall = true;
-      result = fn.apply(_this, arguments);
+      if (fnDidRunCallback) {
+        try {
+          result = fn.apply(_this, arguments);
+        } finally {
+          fnDidRunCallback();
+        }
+      } else {
+        result = fn.apply(_this, arguments);
+      }
       return result;
     };
   }
@@ -180,9 +188,7 @@
     Iterable2.map = map;
     function* concat(...iterables) {
       for (const iterable of iterables) {
-        for (const element of iterable) {
-          yield element;
-        }
+        yield* iterable;
       }
     }
     Iterable2.concat = concat;
@@ -926,8 +932,8 @@
       return result.event;
     }
     Event2.fromPromise = fromPromise;
-    function runAndSubscribe(event, handler) {
-      handler(void 0);
+    function runAndSubscribe(event, handler, initial) {
+      handler(initial);
       return event((e) => handler(e));
     }
     Event2.runAndSubscribe = runAndSubscribe;
@@ -992,7 +998,7 @@
     }
     Event2.fromObservable = fromObservable;
     function fromObservableLight(observable) {
-      return (listener) => {
+      return (listener, thisArgs, disposables) => {
         let count = 0;
         let didChange = false;
         const observer = {
@@ -1005,7 +1011,7 @@
               observable.reportChanges();
               if (didChange) {
                 didChange = false;
-                listener();
+                listener.call(thisArgs);
               }
             }
           },
@@ -1017,11 +1023,17 @@
         };
         observable.addObserver(observer);
         observable.reportChanges();
-        return {
+        const disposable = {
           dispose() {
             observable.removeObserver(observer);
           }
         };
+        if (disposables instanceof DisposableStore) {
+          disposables.add(disposable);
+        } else if (Array.isArray(disposables)) {
+          disposables.push(disposable);
+        }
+        return disposable;
       };
     }
     Event2.fromObservableLight = fromObservableLight;
@@ -1398,10 +1410,10 @@
   var _platformLocale = LANGUAGE_DEFAULT;
   var _translationsConfigFile = void 0;
   var _userAgent = void 0;
-  var globals = typeof self === "object" ? self : typeof global === "object" ? global : {};
+  var $globalThis = globalThis;
   var nodeProcess = void 0;
-  if (typeof globals.vscode !== "undefined" && typeof globals.vscode.process !== "undefined") {
-    nodeProcess = globals.vscode.process;
+  if (typeof $globalThis.vscode !== "undefined" && typeof $globalThis.vscode.process !== "undefined") {
+    nodeProcess = $globalThis.vscode.process;
   } else if (typeof process !== "undefined") {
     nodeProcess = process;
   }
@@ -1460,13 +1472,14 @@
   }
   var isWindows = _isWindows;
   var isMacintosh = _isMacintosh;
-  var isWebWorker = _isWeb && typeof globals.importScripts === "function";
+  var isWebWorker = _isWeb && typeof $globalThis.importScripts === "function";
+  var webWorkerOrigin = isWebWorker ? $globalThis.origin : void 0;
   var userAgent = _userAgent;
-  var setTimeout0IsFaster = typeof globals.postMessage === "function" && !globals.importScripts;
+  var setTimeout0IsFaster = typeof $globalThis.postMessage === "function" && !$globalThis.importScripts;
   var setTimeout0 = (() => {
     if (setTimeout0IsFaster) {
       const pending = [];
-      globals.addEventListener("message", (e) => {
+      $globalThis.addEventListener("message", (e) => {
         if (e.data && e.data.vscodeScheduleAsyncWork) {
           for (let i = 0, len = pending.length; i < len; i++) {
             const candidate = pending[i];
@@ -1485,7 +1498,7 @@
           id: myId,
           callback
         });
-        globals.postMessage({ vscodeScheduleAsyncWork: myId }, "*");
+        $globalThis.postMessage({ vscodeScheduleAsyncWork: myId }, "*");
       };
     }
     return (callback) => setTimeout(callback);
@@ -2995,8 +3008,9 @@
 
   // node_modules/monaco-editor/esm/vs/base/common/process.js
   var safeProcess;
-  if (typeof globals.vscode !== "undefined" && typeof globals.vscode.process !== "undefined") {
-    const sandboxProcess = globals.vscode.process;
+  var vscodeGlobal = globalThis.vscode;
+  if (typeof vscodeGlobal !== "undefined" && typeof vscodeGlobal.process !== "undefined") {
+    const sandboxProcess = vscodeGlobal.process;
     safeProcess = {
       get platform() {
         return sandboxProcess.platform;
@@ -4751,6 +4765,12 @@
     static isIPosition(obj) {
       return obj && typeof obj.lineNumber === "number" && typeof obj.column === "number";
     }
+    toJSON() {
+      return {
+        lineNumber: this.lineNumber,
+        column: this.column
+      };
+    }
   };
 
   // node_modules/monaco-editor/esm/vs/editor/common/core/range.js
@@ -5538,6 +5558,7 @@
     timeBudget: 150
   });
   function getWordAtText(column, wordDefinition, text, textOffset, config) {
+    wordDefinition = ensureValidWordDefinition(wordDefinition);
     if (!config) {
       config = Iterable.first(_defaultConfig);
     }
@@ -7186,6 +7207,24 @@
     sparkle: register("sparkle", 60432),
     insert: register("insert", 60433),
     mic: register("mic", 60434),
+    thumbsDownFilled: register("thumbsdown-filled", 60435),
+    thumbsUpFilled: register("thumbsup-filled", 60436),
+    coffee: register("coffee", 60437),
+    snake: register("snake", 60438),
+    game: register("game", 60439),
+    vr: register("vr", 60440),
+    chip: register("chip", 60441),
+    piano: register("piano", 60442),
+    music: register("music", 60443),
+    micFilled: register("mic-filled", 60444),
+    gitFetch: register("git-fetch", 60445),
+    copilot: register("copilot", 60446),
+    lightbulbSparkle: register("lightbulb-sparkle", 60447),
+    lightbulbSparkleAutofix: register("lightbulb-sparkle-autofix", 60447),
+    robot: register("robot", 60448),
+    sparkleFilled: register("sparkle-filled", 60449),
+    diffSingle: register("diff-single", 60450),
+    diffMultiple: register("diff-multiple", 60451),
     // derived icons, that could become separate icons
     dialogError: register("dialog-error", "error"),
     dialogWarning: register("dialog-warning", "warning"),
@@ -7209,33 +7248,6 @@
   };
 
   // node_modules/monaco-editor/esm/vs/editor/common/tokenizationRegistry.js
-  var __awaiter = function(thisArg, _arguments, P, generator) {
-    function adopt(value) {
-      return value instanceof P ? value : new P(function(resolve2) {
-        resolve2(value);
-      });
-    }
-    return new (P || (P = Promise))(function(resolve2, reject) {
-      function fulfilled(value) {
-        try {
-          step(generator.next(value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-      function rejected(value) {
-        try {
-          step(generator["throw"](value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-      function step(result) {
-        result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
-      }
-      step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-  };
   var TokenizationRegistry = class {
     constructor() {
       this._tokenizationSupports = /* @__PURE__ */ new Map();
@@ -7278,19 +7290,17 @@
         v.dispose();
       });
     }
-    getOrCreate(languageId) {
-      return __awaiter(this, void 0, void 0, function* () {
-        const tokenizationSupport = this.get(languageId);
-        if (tokenizationSupport) {
-          return tokenizationSupport;
-        }
-        const factory = this._factories.get(languageId);
-        if (!factory || factory.isResolved) {
-          return null;
-        }
-        yield factory.resolve();
-        return this.get(languageId);
-      });
+    async getOrCreate(languageId) {
+      const tokenizationSupport = this.get(languageId);
+      if (tokenizationSupport) {
+        return tokenizationSupport;
+      }
+      const factory = this._factories.get(languageId);
+      if (!factory || factory.isResolved) {
+        return null;
+      }
+      await factory.resolve();
+      return this.get(languageId);
     }
     isResolved(languageId) {
       const tokenizationSupport = this.get(languageId);
@@ -7340,22 +7350,18 @@
       this._isDisposed = true;
       super.dispose();
     }
-    resolve() {
-      return __awaiter(this, void 0, void 0, function* () {
-        if (!this._resolvePromise) {
-          this._resolvePromise = this._create();
-        }
-        return this._resolvePromise;
-      });
+    async resolve() {
+      if (!this._resolvePromise) {
+        this._resolvePromise = this._create();
+      }
+      return this._resolvePromise;
     }
-    _create() {
-      return __awaiter(this, void 0, void 0, function* () {
-        const value = yield this._factory.tokenizationSupport;
-        this._isResolved = true;
-        if (value && !this._isDisposed) {
-          this._register(this._registry.register(this._languageId, value));
-        }
-      });
+    async _create() {
+      const value = await this._factory.tokenizationSupport;
+      this._isResolved = true;
+      if (value && !this._isDisposed) {
+        this._register(this._registry.register(this._languageId, value));
+      }
     }
   };
 
@@ -8287,6 +8293,12 @@
     SelectionDirection2[SelectionDirection2["LTR"] = 0] = "LTR";
     SelectionDirection2[SelectionDirection2["RTL"] = 1] = "RTL";
   })(SelectionDirection || (SelectionDirection = {}));
+  var ShowAiIconMode;
+  (function(ShowAiIconMode2) {
+    ShowAiIconMode2["Off"] = "off";
+    ShowAiIconMode2["OnCode"] = "onCode";
+    ShowAiIconMode2["On"] = "on";
+  })(ShowAiIconMode || (ShowAiIconMode = {}));
   var SignatureHelpTriggerKind2;
   (function(SignatureHelpTriggerKind3) {
     SignatureHelpTriggerKind3[SignatureHelpTriggerKind3["Invoke"] = 1] = "Invoke";
@@ -8785,6 +8797,9 @@
     static ofLength(length) {
       return new _OffsetRange(0, length);
     }
+    static ofStartAndLength(start, length) {
+      return new _OffsetRange(start, start + length);
+    }
     constructor(start, endExclusive) {
       this.start = start;
       this.endExclusive = endExclusive;
@@ -8839,6 +8854,12 @@
         return new _OffsetRange(start, end);
       }
       return void 0;
+    }
+    isBefore(other) {
+      return this.endExclusive <= other.start;
+    }
+    isAfter(other) {
+      return this.start >= other.endExclusive;
     }
     slice(arr) {
       return arr.slice(this.start, this.endExclusive);
@@ -8944,6 +8965,9 @@
   var LineRange = class _LineRange {
     static fromRange(range) {
       return new _LineRange(range.startLineNumber, range.endLineNumber);
+    }
+    static fromRangeInclusive(range) {
+      return new _LineRange(range.startLineNumber, range.endLineNumber + 1);
     }
     /**
      * @param lineRanges An array of sorted line ranges.
@@ -9095,6 +9119,10 @@
     contains(lineNumber) {
       const rangeThatStartsBeforeEnd = findLastMonotonous(this._normalizedRanges, (r) => r.startLineNumber <= lineNumber);
       return !!rangeThatStartsBeforeEnd && rangeThatStartsBeforeEnd.endLineNumberExclusive > lineNumber;
+    }
+    intersects(range) {
+      const rangeThatStartsBeforeEnd = findLastMonotonous(this._normalizedRanges, (r) => r.startLineNumber < range.endLineNumberExclusive);
+      return !!rangeThatStartsBeforeEnd && rangeThatStartsBeforeEnd.endLineNumberExclusive > range.startLineNumber;
     }
     getUnion(other) {
       if (this._normalizedRanges.length === 0) {
@@ -10535,7 +10563,7 @@
     getBoundaryScore(length) {
       const prevCategory = getCategory(length > 0 ? this.elements[length - 1] : -1);
       const nextCategory = getCategory(length < this.elements.length ? this.elements[length] : -1);
-      if (prevCategory === 6 && nextCategory === 7) {
+      if (prevCategory === 7 && nextCategory === 8) {
         return 0;
       }
       let score2 = 0;
@@ -10618,14 +10646,18 @@
     ]: 2,
     [
       5
-      /* CharBoundaryCategory.Space */
+      /* CharBoundaryCategory.Separator */
     ]: 3,
     [
       6
+      /* CharBoundaryCategory.Space */
+    ]: 3,
+    [
+      7
       /* CharBoundaryCategory.LineBreakCR */
     ]: 10,
     [
-      7
+      8
       /* CharBoundaryCategory.LineBreakLF */
     ]: 10
   };
@@ -10634,11 +10666,11 @@
   }
   function getCategory(charCode) {
     if (charCode === 10) {
-      return 7;
+      return 8;
     } else if (charCode === 13) {
-      return 6;
+      return 7;
     } else if (isSpace(charCode)) {
-      return 5;
+      return 6;
     } else if (charCode >= 97 && charCode <= 122) {
       return 0;
     } else if (charCode >= 65 && charCode <= 90) {
@@ -10647,6 +10679,8 @@
       return 2;
     } else if (charCode === -1) {
       return 3;
+    } else if (charCode === 44 || charCode === 59) {
+      return 5;
     } else {
       return 4;
     }
@@ -10663,11 +10697,21 @@
     pushMany(moves, unchangedMoves);
     moves = joinCloseConsecutiveMoves(moves);
     moves = moves.filter((current) => {
-      const originalText = current.original.toOffsetRange().slice(originalLines).map((l) => l.trim()).join("\n");
-      return originalText.length >= 10;
+      const lines = current.original.toOffsetRange().slice(originalLines).map((l) => l.trim());
+      const originalText = lines.join("\n");
+      return originalText.length >= 15 && countWhere(lines, (l) => l.length >= 2) >= 2;
     });
     moves = removeMovesInSameDiff(changes, moves);
     return moves;
+  }
+  function countWhere(arr, predicate) {
+    let count = 0;
+    for (const t of arr) {
+      if (predicate(t)) {
+        count++;
+      }
+    }
+    return count;
   }
   function computeMovesFromSimpleDeletionsToSimpleInsertions(changes, originalLines, modifiedLines, timeout) {
     const moves = [];
@@ -10860,8 +10904,8 @@
   function removeMovesInSameDiff(changes, moves) {
     const changesMonotonous = new MonotonousArray(changes);
     moves = moves.filter((m) => {
-      const diffBeforeEndOfMoveOriginal = changesMonotonous.findLastMonotonous((c) => c.original.endLineNumberExclusive < m.original.endLineNumberExclusive) || new LineRangeMapping(new LineRange(1, 1), new LineRange(1, 1));
-      const diffBeforeEndOfMoveModified = findLastMonotonous(changes, (c) => c.modified.endLineNumberExclusive < m.modified.endLineNumberExclusive);
+      const diffBeforeEndOfMoveOriginal = changesMonotonous.findLastMonotonous((c) => c.original.startLineNumber < m.original.endLineNumberExclusive) || new LineRangeMapping(new LineRange(1, 1), new LineRange(1, 1));
+      const diffBeforeEndOfMoveModified = findLastMonotonous(changes, (c) => c.modified.startLineNumber < m.modified.endLineNumberExclusive);
       const differentDiffs = diffBeforeEndOfMoveOriginal !== diffBeforeEndOfMoveModified;
       return differentDiffs;
     });
@@ -10871,6 +10915,7 @@
   // node_modules/monaco-editor/esm/vs/editor/common/diff/defaultLinesDiffComputer/heuristicSequenceOptimizations.js
   function optimizeSequenceDiffs(sequence1, sequence2, sequenceDiffs) {
     let result = sequenceDiffs;
+    result = joinSequenceDiffsByShifting(sequence1, sequence2, result);
     result = joinSequenceDiffsByShifting(sequence1, sequence2, result);
     result = shiftSequenceDiffs(sequence1, sequence2, result);
     return result;
@@ -11137,7 +11182,7 @@
           function cap(v) {
             return Math.min(v, max);
           }
-          if (Math.pow(Math.pow(cap(beforeLineCount1 * 40 + beforeSeq1Length), 1.5) + Math.pow(cap(beforeLineCount2 * 40 + beforeSeq2Length), 1.5), 1.5) + Math.pow(Math.pow(cap(afterLineCount1 * 40 + afterSeq1Length), 1.5) + Math.pow(cap(afterLineCount2 * 40 + afterSeq2Length), 1.5), 1.5) > Math.pow(Math.pow(max, 1.5), 1.5) * 1.3) {
+          if (Math.pow(Math.pow(cap(beforeLineCount1 * 40 + beforeSeq1Length), 1.5) + Math.pow(cap(beforeLineCount2 * 40 + beforeSeq2Length), 1.5), 1.5) + Math.pow(Math.pow(cap(afterLineCount1 * 40 + afterSeq1Length), 1.5) + Math.pow(cap(afterLineCount2 * 40 + afterSeq2Length), 1.5), 1.5) > (max ** 1.5) ** 1.5 * 1.3) {
             return true;
           }
           return false;
@@ -11958,33 +12003,6 @@
   }
 
   // node_modules/monaco-editor/esm/vs/editor/common/services/editorSimpleWorker.js
-  var __awaiter2 = function(thisArg, _arguments, P, generator) {
-    function adopt(value) {
-      return value instanceof P ? value : new P(function(resolve2) {
-        resolve2(value);
-      });
-    }
-    return new (P || (P = Promise))(function(resolve2, reject) {
-      function fulfilled(value) {
-        try {
-          step(generator.next(value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-      function rejected(value) {
-        try {
-          step(generator["throw"](value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-      function step(result) {
-        result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
-      }
-      step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-  };
   var MirrorModel = class extends MirrorTextModel {
     get uri() {
       return this._uri;
@@ -12189,25 +12207,21 @@
       }
       delete this._models[strURL];
     }
-    computeUnicodeHighlights(url, options, range) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        const model = this._getModel(url);
-        if (!model) {
-          return { ranges: [], hasMore: false, ambiguousCharacterCount: 0, invisibleCharacterCount: 0, nonBasicAsciiCharacterCount: 0 };
-        }
-        return UnicodeTextModelHighlighter.computeUnicodeHighlights(model, options, range);
-      });
+    async computeUnicodeHighlights(url, options, range) {
+      const model = this._getModel(url);
+      if (!model) {
+        return { ranges: [], hasMore: false, ambiguousCharacterCount: 0, invisibleCharacterCount: 0, nonBasicAsciiCharacterCount: 0 };
+      }
+      return UnicodeTextModelHighlighter.computeUnicodeHighlights(model, options, range);
     }
     // ---- BEGIN diff --------------------------------------------------------------------------
-    computeDiff(originalUrl, modifiedUrl, options, algorithm) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        const original = this._getModel(originalUrl);
-        const modified = this._getModel(modifiedUrl);
-        if (!original || !modified) {
-          return null;
-        }
-        return _EditorSimpleWorker.computeDiff(original, modified, options, algorithm);
-      });
+    async computeDiff(originalUrl, modifiedUrl, options, algorithm) {
+      const original = this._getModel(originalUrl);
+      const modified = this._getModel(modifiedUrl);
+      if (!original || !modified) {
+        return null;
+      }
+      return _EditorSimpleWorker.computeDiff(original, modified, options, algorithm);
     }
     static computeDiff(originalTextModel, modifiedTextModel, options, algorithm) {
       const diffAlgorithm = algorithm === "advanced" ? linesDiffComputers.getDefault() : linesDiffComputers.getLegacy();
@@ -12258,170 +12272,158 @@
       }
       return true;
     }
-    computeMoreMinimalEdits(modelUrl, edits, pretty) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        const model = this._getModel(modelUrl);
-        if (!model) {
-          return edits;
+    async computeMoreMinimalEdits(modelUrl, edits, pretty) {
+      const model = this._getModel(modelUrl);
+      if (!model) {
+        return edits;
+      }
+      const result = [];
+      let lastEol = void 0;
+      edits = edits.slice(0).sort((a2, b) => {
+        if (a2.range && b.range) {
+          return Range.compareRangesUsingStarts(a2.range, b.range);
         }
-        const result = [];
-        let lastEol = void 0;
-        edits = edits.slice(0).sort((a2, b) => {
-          if (a2.range && b.range) {
-            return Range.compareRangesUsingStarts(a2.range, b.range);
-          }
-          const aRng = a2.range ? 0 : 1;
-          const bRng = b.range ? 0 : 1;
-          return aRng - bRng;
-        });
-        let writeIndex = 0;
-        for (let readIndex = 1; readIndex < edits.length; readIndex++) {
-          if (Range.getEndPosition(edits[writeIndex].range).equals(Range.getStartPosition(edits[readIndex].range))) {
-            edits[writeIndex].range = Range.fromPositions(Range.getStartPosition(edits[writeIndex].range), Range.getEndPosition(edits[readIndex].range));
-            edits[writeIndex].text += edits[readIndex].text;
-          } else {
-            writeIndex++;
-            edits[writeIndex] = edits[readIndex];
-          }
-        }
-        edits.length = writeIndex + 1;
-        for (let { range, text, eol } of edits) {
-          if (typeof eol === "number") {
-            lastEol = eol;
-          }
-          if (Range.isEmpty(range) && !text) {
-            continue;
-          }
-          const original = model.getValueInRange(range);
-          text = text.replace(/\r\n|\n|\r/g, model.eol);
-          if (original === text) {
-            continue;
-          }
-          if (Math.max(text.length, original.length) > _EditorSimpleWorker._diffLimit) {
-            result.push({ range, text });
-            continue;
-          }
-          const changes = stringDiff(original, text, pretty);
-          const editOffset = model.offsetAt(Range.lift(range).getStartPosition());
-          for (const change of changes) {
-            const start = model.positionAt(editOffset + change.originalStart);
-            const end = model.positionAt(editOffset + change.originalStart + change.originalLength);
-            const newEdit = {
-              text: text.substr(change.modifiedStart, change.modifiedLength),
-              range: { startLineNumber: start.lineNumber, startColumn: start.column, endLineNumber: end.lineNumber, endColumn: end.column }
-            };
-            if (model.getValueInRange(newEdit.range) !== newEdit.text) {
-              result.push(newEdit);
-            }
-          }
-        }
-        if (typeof lastEol === "number") {
-          result.push({ eol: lastEol, text: "", range: { startLineNumber: 0, startColumn: 0, endLineNumber: 0, endColumn: 0 } });
-        }
-        return result;
+        const aRng = a2.range ? 0 : 1;
+        const bRng = b.range ? 0 : 1;
+        return aRng - bRng;
       });
+      let writeIndex = 0;
+      for (let readIndex = 1; readIndex < edits.length; readIndex++) {
+        if (Range.getEndPosition(edits[writeIndex].range).equals(Range.getStartPosition(edits[readIndex].range))) {
+          edits[writeIndex].range = Range.fromPositions(Range.getStartPosition(edits[writeIndex].range), Range.getEndPosition(edits[readIndex].range));
+          edits[writeIndex].text += edits[readIndex].text;
+        } else {
+          writeIndex++;
+          edits[writeIndex] = edits[readIndex];
+        }
+      }
+      edits.length = writeIndex + 1;
+      for (let { range, text, eol } of edits) {
+        if (typeof eol === "number") {
+          lastEol = eol;
+        }
+        if (Range.isEmpty(range) && !text) {
+          continue;
+        }
+        const original = model.getValueInRange(range);
+        text = text.replace(/\r\n|\n|\r/g, model.eol);
+        if (original === text) {
+          continue;
+        }
+        if (Math.max(text.length, original.length) > _EditorSimpleWorker._diffLimit) {
+          result.push({ range, text });
+          continue;
+        }
+        const changes = stringDiff(original, text, pretty);
+        const editOffset = model.offsetAt(Range.lift(range).getStartPosition());
+        for (const change of changes) {
+          const start = model.positionAt(editOffset + change.originalStart);
+          const end = model.positionAt(editOffset + change.originalStart + change.originalLength);
+          const newEdit = {
+            text: text.substr(change.modifiedStart, change.modifiedLength),
+            range: { startLineNumber: start.lineNumber, startColumn: start.column, endLineNumber: end.lineNumber, endColumn: end.column }
+          };
+          if (model.getValueInRange(newEdit.range) !== newEdit.text) {
+            result.push(newEdit);
+          }
+        }
+      }
+      if (typeof lastEol === "number") {
+        result.push({ eol: lastEol, text: "", range: { startLineNumber: 0, startColumn: 0, endLineNumber: 0, endColumn: 0 } });
+      }
+      return result;
     }
     // ---- END minimal edits ---------------------------------------------------------------
-    computeLinks(modelUrl) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        const model = this._getModel(modelUrl);
-        if (!model) {
-          return null;
-        }
-        return computeLinks(model);
-      });
+    async computeLinks(modelUrl) {
+      const model = this._getModel(modelUrl);
+      if (!model) {
+        return null;
+      }
+      return computeLinks(model);
     }
     // --- BEGIN default document colors -----------------------------------------------------------
-    computeDefaultDocumentColors(modelUrl) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        const model = this._getModel(modelUrl);
-        if (!model) {
-          return null;
-        }
-        return computeDefaultDocumentColors(model);
-      });
+    async computeDefaultDocumentColors(modelUrl) {
+      const model = this._getModel(modelUrl);
+      if (!model) {
+        return null;
+      }
+      return computeDefaultDocumentColors(model);
     }
-    textualSuggest(modelUrls, leadingWord, wordDef, wordDefFlags) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        const sw = new StopWatch();
-        const wordDefRegExp = new RegExp(wordDef, wordDefFlags);
-        const seen = /* @__PURE__ */ new Set();
-        outer:
-          for (const url of modelUrls) {
-            const model = this._getModel(url);
-            if (!model) {
+    async textualSuggest(modelUrls, leadingWord, wordDef, wordDefFlags) {
+      const sw = new StopWatch();
+      const wordDefRegExp = new RegExp(wordDef, wordDefFlags);
+      const seen = /* @__PURE__ */ new Set();
+      outer:
+        for (const url of modelUrls) {
+          const model = this._getModel(url);
+          if (!model) {
+            continue;
+          }
+          for (const word of model.words(wordDefRegExp)) {
+            if (word === leadingWord || !isNaN(Number(word))) {
               continue;
             }
-            for (const word of model.words(wordDefRegExp)) {
-              if (word === leadingWord || !isNaN(Number(word))) {
-                continue;
-              }
-              seen.add(word);
-              if (seen.size > _EditorSimpleWorker._suggestionsLimit) {
-                break outer;
-              }
+            seen.add(word);
+            if (seen.size > _EditorSimpleWorker._suggestionsLimit) {
+              break outer;
             }
           }
-        return { words: Array.from(seen), duration: sw.elapsed() };
-      });
+        }
+      return { words: Array.from(seen), duration: sw.elapsed() };
     }
     // ---- END suggest --------------------------------------------------------------------------
     //#region -- word ranges --
-    computeWordRanges(modelUrl, range, wordDef, wordDefFlags) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        const model = this._getModel(modelUrl);
-        if (!model) {
-          return /* @__PURE__ */ Object.create(null);
-        }
-        const wordDefRegExp = new RegExp(wordDef, wordDefFlags);
-        const result = /* @__PURE__ */ Object.create(null);
-        for (let line = range.startLineNumber; line < range.endLineNumber; line++) {
-          const words = model.getLineWords(line, wordDefRegExp);
-          for (const word of words) {
-            if (!isNaN(Number(word.word))) {
-              continue;
-            }
-            let array = result[word.word];
-            if (!array) {
-              array = [];
-              result[word.word] = array;
-            }
-            array.push({
-              startLineNumber: line,
-              startColumn: word.startColumn,
-              endLineNumber: line,
-              endColumn: word.endColumn
-            });
+    async computeWordRanges(modelUrl, range, wordDef, wordDefFlags) {
+      const model = this._getModel(modelUrl);
+      if (!model) {
+        return /* @__PURE__ */ Object.create(null);
+      }
+      const wordDefRegExp = new RegExp(wordDef, wordDefFlags);
+      const result = /* @__PURE__ */ Object.create(null);
+      for (let line = range.startLineNumber; line < range.endLineNumber; line++) {
+        const words = model.getLineWords(line, wordDefRegExp);
+        for (const word of words) {
+          if (!isNaN(Number(word.word))) {
+            continue;
           }
+          let array = result[word.word];
+          if (!array) {
+            array = [];
+            result[word.word] = array;
+          }
+          array.push({
+            startLineNumber: line,
+            startColumn: word.startColumn,
+            endLineNumber: line,
+            endColumn: word.endColumn
+          });
         }
-        return result;
-      });
+      }
+      return result;
     }
     //#endregion
-    navigateValueSet(modelUrl, range, up, wordDef, wordDefFlags) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        const model = this._getModel(modelUrl);
-        if (!model) {
-          return null;
-        }
-        const wordDefRegExp = new RegExp(wordDef, wordDefFlags);
-        if (range.startColumn === range.endColumn) {
-          range = {
-            startLineNumber: range.startLineNumber,
-            startColumn: range.startColumn,
-            endLineNumber: range.endLineNumber,
-            endColumn: range.endColumn + 1
-          };
-        }
-        const selectionText = model.getValueInRange(range);
-        const wordRange = model.getWordAtPosition({ lineNumber: range.startLineNumber, column: range.startColumn }, wordDefRegExp);
-        if (!wordRange) {
-          return null;
-        }
-        const word = model.getValueInRange(wordRange);
-        const result = BasicInplaceReplace.INSTANCE.navigateValueSet(range, selectionText, wordRange, word, up);
-        return result;
-      });
+    async navigateValueSet(modelUrl, range, up, wordDef, wordDefFlags) {
+      const model = this._getModel(modelUrl);
+      if (!model) {
+        return null;
+      }
+      const wordDefRegExp = new RegExp(wordDef, wordDefFlags);
+      if (range.startColumn === range.endColumn) {
+        range = {
+          startLineNumber: range.startLineNumber,
+          startColumn: range.startColumn,
+          endLineNumber: range.endLineNumber,
+          endColumn: range.endColumn + 1
+        };
+      }
+      const selectionText = model.getValueInRange(range);
+      const wordRange = model.getWordAtPosition({ lineNumber: range.startLineNumber, column: range.startColumn }, wordDefRegExp);
+      if (!wordRange) {
+        return null;
+      }
+      const word = model.getValueInRange(wordRange);
+      const result = BasicInplaceReplace.INSTANCE.navigateValueSet(range, selectionText, wordRange, word, up);
+      return result;
     }
     // ---- BEGIN foreign module support --------------------------------------------------------------------------
     loadForeignModule(moduleId, createData, foreignHostMethods) {
@@ -13108,7 +13110,7 @@
     }
     return s;
   }
-  var __extends = function() {
+  var __extends = /* @__PURE__ */ function() {
     var extendStatics = function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -14937,7 +14939,7 @@
     return localize2;
   }
   var localize22 = loadMessageBundle();
-  var CSSIssueType = function() {
+  var CSSIssueType = /* @__PURE__ */ function() {
     function CSSIssueType2(id, message) {
       this.id = id;
       this.message = message;
@@ -18808,7 +18810,7 @@
     }
     return result;
   }
-  var __extends2 = function() {
+  var __extends2 = /* @__PURE__ */ function() {
     var extendStatics = function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -18894,7 +18896,7 @@
     }
     return GlobalScope2;
   }(Scope);
-  var Symbol2 = function() {
+  var Symbol2 = /* @__PURE__ */ function() {
     function Symbol3(name, value, node, type) {
       this.name = name;
       this.value = value;
@@ -19352,7 +19354,7 @@
       }
       var l = "", p = "/", g = /^(([^:/?#]+?):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/, d = function() {
         function t3(t4, e3, r3, n2, o2, i2) {
-          void 0 === i2 && (i2 = false), "object" == typeof t4 ? (this.scheme = t4.scheme || l, this.authority = t4.authority || l, this.path = t4.path || l, this.query = t4.query || l, this.fragment = t4.fragment || l) : (this.scheme = function(t5, e4) {
+          void 0 === i2 && (i2 = false), "object" == typeof t4 ? (this.scheme = t4.scheme || l, this.authority = t4.authority || l, this.path = t4.path || l, this.query = t4.query || l, this.fragment = t4.fragment || l) : (this.scheme = /* @__PURE__ */ function(t5, e4) {
             return t5 || e4 ? t5 : "file";
           }(t4, i2), this.authority = e3 || l, this.path = function(t5, e4) {
             switch (t5) {
@@ -19533,7 +19535,7 @@
     }
     return Utils.joinPath.apply(Utils, __spreadArray2([URI2.parse(uriString)], paths, false)).toString();
   }
-  var __awaiter3 = function(thisArg, _arguments, P, generator) {
+  var __awaiter = function(thisArg, _arguments, P, generator) {
     function adopt(value) {
       return value instanceof P ? value : new P(function(resolve2) {
         resolve2(value);
@@ -19649,7 +19651,7 @@
       this.importCompletions.push(context);
     };
     PathCompletionParticipant2.prototype.computeCompletions = function(document2, documentContext) {
-      return __awaiter3(this, void 0, void 0, function() {
+      return __awaiter(this, void 0, void 0, function() {
         var result, _i, _a22, literalCompletion, uriValue, fullValue, items, _b2, items_1, item, _c, _d, importCompletion, pathValue, fullValue, suggestions, _e, suggestions_1, item;
         return __generator(this, function(_f2) {
           switch (_f2.label) {
@@ -19722,7 +19724,7 @@
       });
     };
     PathCompletionParticipant2.prototype.providePathSuggestions = function(pathValue, position, range, document2, documentContext) {
-      return __awaiter3(this, void 0, void 0, function() {
+      return __awaiter(this, void 0, void 0, function() {
         var fullValue, isValueQuoted, valueBeforeCursor, currentDocUri, fullValueRange, replaceRange, valueBeforeLastSlash, parentDir, result, infos, _i, infos_1, _a22, name, type, e_1;
         return __generator(this, function(_b2) {
           switch (_b2.label) {
@@ -19820,7 +19822,7 @@
     var end = shiftPosition(range.end, endOffset);
     return Range2.create(start, end);
   }
-  var __awaiter22 = function(thisArg, _arguments, P, generator) {
+  var __awaiter2 = function(thisArg, _arguments, P, generator) {
     function adopt(value) {
       return value instanceof P ? value : new P(function(resolve2) {
         resolve2(value);
@@ -19963,7 +19965,7 @@
       if (completionSettings === void 0) {
         completionSettings = this.defaultSettings;
       }
-      return __awaiter22(this, void 0, void 0, function() {
+      return __awaiter2(this, void 0, void 0, function() {
         var participant, contributedParticipants, result, pathCompletionResult;
         return __generator2(this, function(_a22) {
           switch (_a22.label) {
@@ -20987,7 +20989,7 @@
   function isColorString(s) {
     return s.toLowerCase() in colors || /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(s);
   }
-  var __extends3 = function() {
+  var __extends3 = /* @__PURE__ */ function() {
     var extendStatics = function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -21199,7 +21201,7 @@
     }
     quotes2.remove = remove;
   })(quotes || (quotes = {}));
-  var Specificity = function() {
+  var Specificity = /* @__PURE__ */ function() {
     function Specificity2() {
       this.id = 0;
       this.attr = 0;
@@ -21615,7 +21617,7 @@
     };
     return CSSHover2;
   }();
-  var __awaiter32 = function(thisArg, _arguments, P, generator) {
+  var __awaiter3 = function(thisArg, _arguments, P, generator) {
     function adopt(value) {
       return value instanceof P ? value : new P(function(resolve2) {
         resolve2(value);
@@ -21807,7 +21809,7 @@
       return resolvedLinks;
     };
     CSSNavigation2.prototype.findDocumentLinks2 = function(document2, stylesheet, documentContext) {
-      return __awaiter32(this, void 0, void 0, function() {
+      return __awaiter3(this, void 0, void 0, function() {
         var linkData, resolvedLinks, _i, linkData_2, data, link, target, resolvedTarget;
         return __generator3(this, function(_a22) {
           switch (_a22.label) {
@@ -21981,7 +21983,7 @@
       };
     };
     CSSNavigation2.prototype.resolveModuleReference = function(ref, documentUri, documentContext) {
-      return __awaiter32(this, void 0, void 0, function() {
+      return __awaiter3(this, void 0, void 0, function() {
         var moduleName, rootFolderUri, documentFolderUri, modulePath, pathWithinModule;
         return __generator3(this, function(_a22) {
           switch (_a22.label) {
@@ -22006,7 +22008,7 @@
       });
     };
     CSSNavigation2.prototype.resolveRelativeReference = function(ref, documentUri, documentContext, isRawLink) {
-      return __awaiter32(this, void 0, void 0, function() {
+      return __awaiter3(this, void 0, void 0, function() {
         var relativeReference, _a22;
         return __generator3(this, function(_b2) {
           switch (_b2.label) {
@@ -22043,7 +22045,7 @@
       });
     };
     CSSNavigation2.prototype.resolvePathToModule = function(_moduleName, documentFolderUri, rootFolderUri) {
-      return __awaiter32(this, void 0, void 0, function() {
+      return __awaiter3(this, void 0, void 0, function() {
         var packPath;
         return __generator3(this, function(_a22) {
           switch (_a22.label) {
@@ -22062,7 +22064,7 @@
       });
     };
     CSSNavigation2.prototype.fileExists = function(uri) {
-      return __awaiter32(this, void 0, void 0, function() {
+      return __awaiter3(this, void 0, void 0, function() {
         var stat, err_1;
         return __generator3(this, function(_a22) {
           switch (_a22.label) {
@@ -22139,7 +22141,7 @@
   var Warning = Level.Warning;
   var Error2 = Level.Error;
   var Ignore = Level.Ignore;
-  var Rule = function() {
+  var Rule = /* @__PURE__ */ function() {
     function Rule2(id, message, defaultValue) {
       this.id = id;
       this.message = message;
@@ -22147,7 +22149,7 @@
     }
     return Rule2;
   }();
-  var Setting = function() {
+  var Setting = /* @__PURE__ */ function() {
     function Setting2(id, message, defaultValue) {
       this.id = id;
       this.message = message;
@@ -22280,7 +22282,7 @@
     };
     return CSSCodeActions2;
   }();
-  var Element2 = function() {
+  var Element2 = /* @__PURE__ */ function() {
     function Element3(decl) {
       this.fullPropertyName = decl.getFullPropertyName().toLowerCase();
       this.node = decl;
@@ -22978,7 +22980,7 @@
     };
     return CSSValidation2;
   }();
-  var __extends4 = function() {
+  var __extends4 = /* @__PURE__ */ function() {
     var extendStatics = function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -23085,7 +23087,7 @@
     return SCSSScanner2;
   }(Scanner);
   var localize10 = loadMessageBundle();
-  var SCSSIssueType = function() {
+  var SCSSIssueType = /* @__PURE__ */ function() {
     function SCSSIssueType2(id, message) {
       this.id = id;
       this.message = message;
@@ -23097,7 +23099,7 @@
     ThroughOrToExpected: new SCSSIssueType("scss-throughexpected", localize10("expected.through", "'through' or 'to' expected")),
     InExpected: new SCSSIssueType("scss-fromexpected", localize10("expected.in", "'in' expected"))
   };
-  var __extends5 = function() {
+  var __extends5 = /* @__PURE__ */ function() {
     var extendStatics = function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -23843,7 +23845,7 @@
     };
     return SCSSParser2;
   }(Parser);
-  var __extends6 = function() {
+  var __extends6 = /* @__PURE__ */ function() {
     var extendStatics = function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -24210,7 +24212,7 @@
       }
     });
   }
-  var __extends7 = function() {
+  var __extends7 = /* @__PURE__ */ function() {
     var extendStatics = function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -24287,7 +24289,7 @@
     };
     return LESSScanner2;
   }(Scanner);
-  var __extends8 = function() {
+  var __extends8 = /* @__PURE__ */ function() {
     var extendStatics = function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -24973,7 +24975,7 @@
     };
     return LESSParser2;
   }(Parser);
-  var __extends9 = function() {
+  var __extends9 = /* @__PURE__ */ function() {
     var extendStatics = function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -48805,7 +48807,7 @@
       return result;
     }
   }
-  var __extends10 = function() {
+  var __extends10 = /* @__PURE__ */ function() {
     var extendStatics = function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -49256,7 +49258,7 @@
 monaco-editor/esm/vs/language/css/css.worker.js:
   (*!-----------------------------------------------------------------------------
    * Copyright (c) Microsoft Corporation. All rights reserved.
-   * Version: 0.44.0(3e047efd345ff102c8c61b5398fb30845aaac166)
+   * Version: 0.45.0(5e5af013f8d295555a7210df0d5f2cea0bf5dd56)
    * Released under the MIT license
    * https://github.com/microsoft/monaco-editor/blob/main/LICENSE.txt
    *-----------------------------------------------------------------------------*)
